@@ -98,6 +98,33 @@
 
   // Produce a duplicate-free version of the array.
   _.uniq = function(array, isSorted, iterator) {
+    var array2 = [];
+    var output = [];
+    var obj = {};
+    if (isSorted === true && iterator) {
+      for (var i = 0; i < array.length; i++) {
+        array2.push(iterator(array[i])); //[true, false, false, false, false];
+      }
+      for (var j = 0; j < array2.length; j++) {
+        if (!obj[array2[j]]) {
+          obj[array2[j]] = array[j];
+        }
+      }
+      return Object.values(obj);
+    }
+    for (var i = 0; i < array.length; i++) {
+      if (!obj[array[i]]) {
+        obj[array[i]] = 0;
+      } else {
+        obj[array[i]]++;
+      }
+    }
+    for (var key in obj) {
+      if (obj[key] === 0) {
+        output.push(+key);
+      }
+    }
+    return output;
   };
 
 
@@ -182,23 +209,20 @@
 
   // Determine whether all of the elements match a truth test.
   _.every = function(collection, iterator) {
-    if (collection.length === 0) return true;
+    if (collection.length === 0) {
+      return true;
+    }
     return _.reduce(collection, function(memo, elem) {
-        return iterator ? ((!memo) ? false : iterator(elem) ? true : false) : !!elem;
+      return iterator ? ((!memo) ? false : iterator(elem) ? true : false) : !!elem;
     }, true);
-};
- //every returns true is all of them pass
- //returns false if one of them fails
-
- //some returns true is one of them pass
- //returns false if all of them fail
+  };
 
   // Determine whether any of the elements pass a truth test. If no iterator is
   // provided, provide a default one
   _.some = function(collection, iterator) {
     // TIP: There's a very clever way to re-use every() here.
     iterator = iterator || _.identity;
-    return !_.every(collection, function(elem){
+    return !_.every(collection, function(elem) {
       return !iterator(elem);
     });
   };
@@ -224,7 +248,7 @@
   //   });
   // obj1 now contains key1, key2, key3 and bla
   _.extend = function(obj) {
-    _.each(arguments, function(objects){
+    _.each(arguments, function(objects) {
       for (var i in objects) {
         obj[i] = objects[i];
       }
@@ -235,7 +259,7 @@
   // Like extend, but doesn't ever overwrite a key that already
   // exists in obj
   _.defaults = function(obj) {
-    _.each(arguments, function(objects){
+    _.each(arguments, function(objects) {
       for (var i in objects) {
         if (!(i in obj)) {
           obj[i] = objects[i];
@@ -286,6 +310,17 @@
   // already computed the result for the given argument and return that value
   // instead if possible.
   _.memoize = function(func) {
+    var cache = {};
+    return function() {
+      var key = JSON.stringify(arguments);
+      if (cache[key]) {
+        return cache[key];
+      } else {
+        var val = func.apply(null, arguments);
+        cache[key] = val;
+        return val;
+      }
+    };
   };
 
   // Delays a function for the given number of milliseconds, and then calls
@@ -295,7 +330,13 @@
   // parameter. For example _.delay(someFunction, 500, 'a', 'b') will
   // call someFunction('a', 'b') after 500ms
   _.delay = function(func, wait) {
+    var argsArray = [].slice.call(arguments, 2);
+
+    return setTimeout(() => {
+      func.apply(null, argsArray);
+    }, wait);
   };
+
 
 
   /**
@@ -309,6 +350,15 @@
   // input array. For a tip on how to make a copy of an array, see:
   // http://mdn.io/Array.prototype.slice
   _.shuffle = function(array) {
+    var arr = array.slice();
+    var temp, pos;
+    for (var i = 0; i < arr.length; i++) {
+      pos = Math.floor(Math.random() * arr.length);
+      temp = arr[i];
+      arr[i] = arr[pos];
+      arr[pos] = temp;
+    }
+    return arr;
   };
 
 
